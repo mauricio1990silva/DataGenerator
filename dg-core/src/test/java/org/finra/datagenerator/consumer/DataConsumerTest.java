@@ -139,7 +139,6 @@ public class DataConsumerTest {
         Assert.assertEquals("var4val", firstMap.get("var4"));
         Assert.assertEquals("var5val", firstMap.get("var5"));
     }
-
     /**
      * Tests transformers
      */
@@ -287,7 +286,13 @@ public class DataConsumerTest {
 //                Assert.fail();
 //            }
 
+
             System.out.println("Output saw a : " + cr.getDataMap());
+        }
+
+        @Override
+        public void finish() {
+
         }
 
         public List<Map<String, String>> getData() {
@@ -315,6 +320,11 @@ public class DataConsumerTest {
         public void writeOutput(DataPipe cr) {
             data.add(cr.getDataMap());
             System.out.println("Output saw a : " + cr.getDataMap());
+        }
+
+        @Override
+        public void finish() {
+
         }
 
         public List<Map<String, String>> getData() {

@@ -15,21 +15,21 @@
  */
 package org.finra.datagenerator.writer;
 
+
 import org.apache.log4j.Logger;
 import org.finra.datagenerator.consumer.DataPipe;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
- * Orders result variables based on a template and writes them seperated by pipe characters to a given OutputStream.
- *
- * Created by robbinbr on 5/28/2014.
- * Updated by Mauricio Silva on 03/27/2015
+ * Created by Mauricio Silva on 3/26/2015.
  */
-public class DefaultWriter implements DataWriter {
+public class JsonWriter implements DataWriter {
+
 
     /**
      * Logger
@@ -37,46 +37,49 @@ public class DefaultWriter implements DataWriter {
     protected static final Logger log = Logger.getLogger(DefaultWriter.class);
     private final OutputStream os;
     private String[] outTemplate;
+    private static JSONArray jsonArray;
     private boolean streaming;
-    private List<String> records;
+
     /**
      * Constructor
      *
      * @param os the output stream to use in writing
      * @param outTemplate the output template to format writing
-     * @param streaming whether or not output should be streaming as it goes
+     * @param streaming whether or not output should be streaming as it moves on
      */
-    public DefaultWriter(final OutputStream os, final String[] outTemplate, final boolean streaming) {
+    public JsonWriter(final OutputStream os, final String[] outTemplate, final boolean streaming) {
+
         this.os = os;
         this.outTemplate = outTemplate;
         this.streaming = streaming;
-        records = new ArrayList<>();
+        jsonArray = new JSONArray();
     }
-
     @Override
     public void writeOutput(DataPipe cr) {
-        String oneRecord = cr.getPipeDelimited(outTemplate);
-        if (streaming) {
-            try {
-                os.write(oneRecord.getBytes());
-                os.write("\n".getBytes());
-            } catch (IOException e) {
-                log.error("IOException in DefaultConsumer", e);
+
+        JSONObject recordInJson = cr.getJsonFormat(outTemplate);
+        if (null != recordInJson) {
+            if (streaming) {
+                try {
+                    os.write(recordInJson.toString(3).getBytes());
+                    os.write("\n".getBytes());
+                } catch (IOException e) {
+                    log.error("IOException in DefaultConsumer", e);
+                }
+            } else {
+                jsonArray.put(recordInJson);
             }
-        } else {
-            records.add(oneRecord);
         }
     }
 
     @Override
     public void finish() {
         try {
-            for (String record : records) {
-                os.write(record.getBytes());
-                os.write("\n".getBytes());
-            }
+            os.write(jsonArray.toString(3).getBytes());
+            os.write("\n".getBytes());
         } catch (IOException e) {
             log.error("IOException in DefaultConsumer", e);
         }
     }
+
 }

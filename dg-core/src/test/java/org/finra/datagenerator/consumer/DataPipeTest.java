@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by RobbinBr on 7/2/2014.
+ * Updated by Mauricio Silva on 03/27/2015.
  */
 public class DataPipeTest {
 
@@ -66,6 +67,51 @@ public class DataPipeTest {
 
         Assert.assertEquals("var1val|var2val|var3val|var4val|var5val", thePipe.getPipeDelimited(outTemplate));
     }
+
+    /**
+     * Tests getGetJsonFormat
+     */
+    @Test
+    public void testGetJsonFormat() {
+        DataPipe thePipe = new DataPipe();
+        thePipe.getDataMap().put("var1", "var1val");
+        thePipe.getDataMap().put("var2", "var2val");
+        thePipe.getDataMap().put("var3", "var3val");
+        thePipe.getDataMap().put("var4", "var4val");
+        thePipe.getDataMap().put("var5", "var5val");
+
+        String[] outTemplate = new String[]{
+                "var1", "var2", "var3", "var4", "var5"
+        };
+
+        Assert.assertEquals(5, thePipe.getDataMap().size());
+
+        Assert.assertEquals("{\"var5\":\"var5val\",\"var3\":\"var3val\",\"var4\":\"var4val\",\"var1\":\"var1val\",\"var2\":\"var2val\"}",
+                (thePipe.getJsonFormat(outTemplate)).toString());
+    }
+
+    /**
+     * Tests getGetJsonFormat
+     */
+//    @Test
+//    public void testGetJsonFormat() {
+//        DataPipe thePipe = new DataPipe();
+//        thePipe.getDataMap().put("var1", "var1val");
+//        thePipe.getDataMap().put("var2", "var2val");
+//        thePipe.getDataMap().put("var3", "var3val");
+//        thePipe.getDataMap().put("var4", "var4val");
+//        thePipe.getDataMap().put("var5", "var5val");
+//
+//        String[] outTemplate = new String[]{
+//                "var1", "var2", "var3", "var4", "var5"
+//        };
+//
+//        Assert.assertEquals(5, thePipe.getDataMap().size());
+//
+//        Assert.assertEquals("{\"var5\":\"var5val\",\"var3\":\"var3val\",\"var4\":\"var4val\",\"var1\":\"var1val\",\"var2\":\"var2val\"}",
+//                thePipe.getJsonFormat(outTemplate).toString());
+//    }
+
 
     /**
      * Tests flag access

@@ -16,8 +16,8 @@
 
 package org.finra.datagenerator.samples.consumer;
 
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
+//import org.apache.hadoop.io.NullWritable;
+//import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.finra.datagenerator.consumer.DataPipe;
 import org.finra.datagenerator.writer.DataWriter;
@@ -47,10 +47,15 @@ public class ContextWriter implements DataWriter {
      * @param cr the DataPipe to write to
      */
     public void writeOutput(DataPipe cr) {
-        try {
-            context.write(NullWritable.get(), new Text(cr.getPipeDelimited(outTemplate)));
-        } catch (Exception e) {
-            throw new RuntimeException("Exception occurred while writing to Context", e);
-        }
+//        try {
+//            context.write(NullWritable.get(), new Text(cr.getPipeDelimited(outTemplate)));
+//        } catch (Exception e) {
+//            throw new RuntimeException("Exception occurred while writing to Context", e);
+//        }
+    }
+
+    @Override
+    public void finish() {
+
     }
 }

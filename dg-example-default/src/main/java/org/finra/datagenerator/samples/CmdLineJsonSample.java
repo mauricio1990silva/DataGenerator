@@ -15,18 +15,11 @@
  */
 package org.finra.datagenerator.samples;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.finra.datagenerator.consumer.DataConsumer;
 import org.finra.datagenerator.consumer.DataTransformer;
 import org.finra.datagenerator.consumer.EquivalenceClassTransformer;
-
 import org.finra.datagenerator.consumer.RepeatingDataConsumer;
 import org.finra.datagenerator.distributor.multithreaded.DefaultDistributor;
 import org.finra.datagenerator.engine.Engine;
@@ -34,20 +27,25 @@ import org.finra.datagenerator.engine.scxml.SCXMLEngine;
 import org.finra.datagenerator.engine.scxml.tags.CustomTagExtension;
 import org.finra.datagenerator.engine.scxml.tags.InLineTransformerExtension;
 import org.finra.datagenerator.samples.transformer.SampleMachineTransformer;
-
 import org.finra.datagenerator.writer.DataWriter;
-import org.finra.datagenerator.writer.DefaultWriter;
+import org.finra.datagenerator.writer.JsonWriter;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * Driver for a simple Data Generator example using the Default Distributor and a single transformer.
  */
-public final class CmdLine {
+public final class CmdLineJsonSample {
 
-    private CmdLine() {
+    private CmdLineJsonSample() {
         // Do nothing
     }
 
-    private static final Logger log = Logger.getLogger(CmdLine.class);
+    private static final Logger log = Logger.getLogger(CmdLineJsonSample.class);
 
     /**
      * Entry point for the example.
@@ -66,7 +64,7 @@ public final class CmdLine {
         Engine engine = new SCXMLEngine(cte);
 
         //will default to samplemachine, but you could specify a different file if you choose to
-        InputStream is = CmdLine.class.getResourceAsStream("/" + (args.length == 0 ? "samplemachine" : args[0]) + ".xml");
+        InputStream is = CmdLineJsonSample.class.getResourceAsStream("/" + (args.length == 0 ? "samplemachine" : args[0]) + ".xml");
 
         engine.setModelByInputFileStream(is);
 
@@ -84,12 +82,16 @@ public final class CmdLine {
         consumer.addDataTransformer(new EquivalenceClassTransformer());
 
         ArrayList<DataWriter> writers = new ArrayList<>();
-
-        DataWriter defaultWriter = new DefaultWriter(System.out,
+        System.out.print("using Json Writer");
+        DataWriter jsonWriter = new JsonWriter(System.out,
                 new String[]{"var_1_1", "var_1_2", "var_1_3", "var_1_4", "var_1_5", "var_1_6",
                         "var_2_1", "var_2_2", "var_2_3", "var_2_4", "var_2_5", "var_2_6"}, true);
-        writers.add(defaultWriter);
-
+        writers.add(jsonWriter);
+//        DataWriter sqlWriter = new SQLWriter(System.out,
+//                new String[]{"var_1_1", "var_1_2", "var_1_3", "var_1_4", "var_1_5", "var_1_6",
+//                        "var_2_1", "var_2_2", "var_2_3", "var_2_4", "var_2_5", "var_2_6"}, true,
+//                "HELLO", "TABLE1", "INSERT");
+//        writers.add(sqlWriter);
 
         for (DataWriter writer : writers) {
             consumer.addDataWriter(writer);

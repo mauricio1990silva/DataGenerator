@@ -21,58 +21,68 @@ import org.finra.datagenerator.consumer.DataPipe;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
+
 
 /**
- * Orders result variables based on a template and writes them seperated by pipe characters to a given OutputStream.
- *
- * Created by robbinbr on 5/28/2014.
- * Updated by Mauricio Silva on 03/27/2015
+ * Created by Mauricio Silva on 3/27/2015.
  */
-public class DefaultWriter implements DataWriter {
-
+public class SQLWriter implements DataWriter {
     /**
      * Logger
      */
     protected static final Logger log = Logger.getLogger(DefaultWriter.class);
     private final OutputStream os;
     private String[] outTemplate;
+    private static ArrayList<String> queries;
     private boolean streaming;
-    private List<String> records;
+    private String schema;
+    private String tableName;
+    private String queryFunction;
+
     /**
      * Constructor
      *
      * @param os the output stream to use in writing
      * @param outTemplate the output template to format writing
-     * @param streaming whether or not output should be streaming as it goes
+     * @param streaming whether or not output should be streaming on the row level
+     * @param schema indicates schema of db
+     * @param tableName indicates table name of db
+     * @param queryFunction insert/update
      */
-    public DefaultWriter(final OutputStream os, final String[] outTemplate, final boolean streaming) {
+    public SQLWriter(final OutputStream os, final String[] outTemplate, final boolean streaming,
+                     final String schema, final String tableName, final String queryFunction) {
+
+        queries = new ArrayList<>();
         this.os = os;
         this.outTemplate = outTemplate;
         this.streaming = streaming;
-        records = new ArrayList<>();
+        this.schema = schema;
+        this.tableName = tableName;
+        this.queryFunction = queryFunction;
     }
 
     @Override
     public void writeOutput(DataPipe cr) {
-        String oneRecord = cr.getPipeDelimited(outTemplate);
-        if (streaming) {
-            try {
-                os.write(oneRecord.getBytes());
-                os.write("\n".getBytes());
-            } catch (IOException e) {
-                log.error("IOException in DefaultConsumer", e);
+        String recordInSQL = cr.getQuery(outTemplate, schema, tableName, queryFunction);
+        if (null != recordInSQL) {
+            if (streaming) {
+                try {
+                    os.write(recordInSQL.getBytes());
+                    os.write("\n".getBytes());
+                } catch (IOException e) {
+                    log.error("IOException in DefaultConsumer", e);
+                }
+            } else {
+                queries.add(recordInSQL);
             }
-        } else {
-            records.add(oneRecord);
         }
     }
 
     @Override
     public void finish() {
         try {
-            for (String record : records) {
-                os.write(record.getBytes());
+            for (String query : queries) {
+                os.write(query.getBytes());
                 os.write("\n".getBytes());
             }
         } catch (IOException e) {

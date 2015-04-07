@@ -30,4 +30,8 @@ public interface DataWriter {
      * @param cr the DataPipe to write to
      */
     void writeOutput(DataPipe cr);
+    /**
+     * Writes the whole output to an output stream under a non streaming selection.
+     */
+    void finish();
 }

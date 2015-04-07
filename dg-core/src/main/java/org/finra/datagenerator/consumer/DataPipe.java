@@ -18,6 +18,8 @@ package org.finra.datagenerator.consumer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.json.JSONObject;
+
 
 /**
  * Wrapper for search results.
@@ -28,6 +30,7 @@ public class DataPipe {
 
     private final Map<String, String> dataMap = new HashMap<>();
     private final DataConsumer dataConsumer;
+    private static final String SPACE = " ";
 
     /**
      * Default constructor. Initializes the dataConsumer to {@link DataConsumer}
@@ -76,7 +79,6 @@ public class DataPipe {
      */
     public String getPipeDelimited(String[] outTemplate) {
         StringBuilder b = new StringBuilder(1024);
-
         for (String var : outTemplate) {
             if (b.length() > 0) {
                 b.append('|');
@@ -85,5 +87,65 @@ public class DataPipe {
         }
 
         return b.toString();
+    }
+
+    /**
+     * Given an array of variable names, returns a JsonObject
+     * of values.
+     *
+     * @param outTemplate an array of {@link String}s containing the variable
+     * names.
+     * @return a jsonObject of values
+     */
+    public JSONObject getJsonFormat(String [] outTemplate) {
+        JSONObject oneRowJson = new JSONObject();
+        for (String var : outTemplate) {
+            if (!var.equals(getDataMap().get(var))) {
+//                System.out.println("var " + var);
+//                System.out.println("value " + getDataMap().get(var));
+                oneRowJson.put(var, getDataMap().get(var));
+            } else {
+                return null;
+            }
+        }
+
+        return oneRowJson;
+    }
+    /**
+     * Given an array of variable names, returns a pipe delimited {@link String}
+     * of values.
+     *
+     * @param outTemplate an array of {@link String}s containing the variable
+     * names.
+     * @param schema of data base
+     * @param table tableName
+     * @param queryFunction update/insert
+     * @return a list  of values
+     */
+    public String getQuery(String [] outTemplate, String schema, String table, String queryFunction)  {
+        StringBuilder keys = new StringBuilder(1024);
+        StringBuilder values = new StringBuilder(1024);
+        //INSERT INTO schema.table (name,email) VALUES ("Quamar","purus@Lorem.org");
+        for (String var : outTemplate) {
+            if (var.equals(getDataMap().get(var))) {
+                return null;
+            }
+            if (keys.length() > 0) {
+                keys.append(',');
+            }
+            if (values.length() > 0) {
+                values.append(',');
+            }
+            keys.append(var);
+            values.append(getDataMap().get(var));
+        }
+        return createQuery(schema, table, queryFunction, keys.toString() , values.toString());
+
+    }
+
+    private String createQuery(String schema, String table, String queryFunction,
+                               String keys, String values) {
+        return queryFunction + SPACE + "INTO" + SPACE + schema + "." + table + SPACE + "(" + keys
+                + ")" + SPACE + "VALUES" + "(" + values + ");";
     }
 }
